@@ -1,19 +1,24 @@
-### Check all namespaces
-```
-go run main.go
+# Kubernetes Security Auditor 🔒
+
+A comprehensive security analysis tool for Kubernetes clusters.
+
+![Kubernetes Security Auditor Demo](./docs/static_files/sample_output.png)
+
+## Installation
+
+```bash
+go get github.com/afshin-deriv/k8s-auditor
 ```
 
-#### Check specific namespace
-```
-go run main.go --namespace default
+## Quick Start
+
+```bash
+k8s-auditor --namespace default
 ```
 
-#### Specify custom output file
-```
-go run main.go --output my-report.json
-```
+## Features
 
-#### Use specific kubeconfig
-```
-go run main.go --kubeconfig /path/to/kubeconfig
-```
+- 🔍 Comprehensive security auditing
+- 🛡️ Multiple security checks
+- 📊 Detailed reporting
+- 🚀 Easy to use

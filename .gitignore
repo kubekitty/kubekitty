@@ -26,3 +26,4 @@ go.work.sum
 
 audit-report.json
 *.json
+k8s-auditor
