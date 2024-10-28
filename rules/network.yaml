@@ -1,0 +1,131 @@
+rules:
+  - name: missing-network-policy
+    description: "Namespace has no NetworkPolicy defined"
+    category: "Network"
+    severity: "HIGH"
+    condition: "NetworkPolicies.Count == 0"
+    suggestion: "Define NetworkPolicy to control ingress/egress traffic"
+    metadata:
+      risk: "Unrestricted network access"
+      impact: "Potential unauthorized access"
+
+
+  - name: non-tls-ingress
+    description: "Ingress does not use TLS"
+    category: "Network"
+    severity: "HIGH"
+    condition: "Spec.TLS == null"
+    suggestion: "Configure TLS to encrypt traffic"
+    metadata:
+      risk: "Unencrypted traffic"
+      impact: "Data exposure"
+
+  - name: allow-all-ingress
+    description: "NetworkPolicy allows all ingress traffic"
+    category: "Network"
+    severity: "HIGH"
+    condition: "Spec.Ingress[*].From == null || len(Spec.Ingress[*].From) == 0"
+    suggestion: "Specify explicit ingress rules instead of allowing all traffic"
+    metadata:
+      risk: "Unrestricted inbound traffic"
+      impact: "Potential unauthorized access"
+      remediation: "Define specific ingress rules with podSelectors or namespaceSelectors"
+
+  - name: allow-all-egress
+    description: "NetworkPolicy allows all egress traffic"
+    category: "Network"
+    severity: "MEDIUM"
+    condition: "Spec.Egress[*].To == null || len(Spec.Egress[*].To) == 0"
+    suggestion: "Specify explicit egress rules"
+    metadata:
+      risk: "Unrestricted outbound traffic"
+      impact: "Potential data exfiltration"
+      remediation: "Define specific egress rules for required destinations"
+
+  - name: exposed-nodeport
+    description: "Service exposed via NodePort"
+    category: "Network"
+    severity: "MEDIUM"
+    condition: "Spec.Type == 'NodePort'"
+    suggestion: "Use ClusterIP and Ingress instead of NodePort when possible"
+    metadata:
+      risk: "Direct node port exposure"
+      impact: "Increased attack surface"
+      remediation: "Implement Ingress controllers for external access"
+
+  - name: exposed-loadbalancer
+    description: "Service exposed via LoadBalancer"
+    category: "Network"
+    severity: "MEDIUM"
+    condition: "Spec.Type == 'LoadBalancer'"
+    suggestion: "Consider using Ingress for HTTP/HTTPS traffic"
+    metadata:
+      risk: "Direct external exposure"
+      impact: "Increased cost and attack surface"
+      remediation: "Use Ingress controllers for HTTP/HTTPS traffic"
+
+  - name: ingress-tls-disabled
+    description: "Ingress does not use TLS"
+    category: "Network"
+    severity: "HIGH"
+    condition: "Spec.TLS == null || len(Spec.TLS) == 0"
+    suggestion: "Configure TLS for Ingress resources"
+    metadata:
+      risk: "Unencrypted traffic"
+      impact: "Data exposure in transit"
+      remediation: "Add TLS configuration with valid certificates"
+
+  - name: sensitive-ports
+    description: "Service exposes sensitive port"
+    category: "Network"
+    severity: "HIGH"
+    condition: "Spec.Ports[*].Port in [22, 3306, 5432, 6379, 27017, 9200]"
+    suggestion: "Avoid exposing sensitive ports directly"
+    metadata:
+      risk: "Direct access to sensitive services"
+      impact: "Potential unauthorized access to critical services"
+      remediation: "Use secure proxies or VPN for accessing sensitive services"
+
+  - name: ingress-wildcard-host
+    description: "Ingress uses wildcard host"
+    category: "Network"
+    severity: "MEDIUM"
+    condition: "Spec.Rules[*].Host startsWith '*'"
+    suggestion: "Specify explicit hostnames instead of wildcards"
+    metadata:
+      risk: "Unintended host matching"
+      impact: "Potential routing to unintended services"
+      remediation: "Define specific host rules"
+
+  - name: default-namespace-exposure
+    description: "Service exposed in default namespace"
+    category: "Network"
+    severity: "MEDIUM"
+    condition: "Metadata.Namespace == 'default' && Spec.Type in ['LoadBalancer', 'NodePort']"
+    suggestion: "Avoid exposing services in default namespace"
+    metadata:
+      risk: "Poor namespace isolation"
+      impact: "Security misconfiguration"
+      remediation: "Create dedicated namespaces for exposed services"
+
+  - name: missing-network-isolation
+    description: "Namespace lacks network isolation"
+    category: "Network"
+    severity: "HIGH"
+    condition: "NetworkPolicies.Count == 0"
+    suggestion: "Implement network policies for namespace isolation"
+    metadata:
+      risk: "No network segmentation"
+      impact: "Cross-namespace attacks"
+      remediation: "Implement default deny and explicit allow policies"
+
+  - name: insecure-backend-protocol
+    description: "Ingress backend uses insecure protocol"
+    category: "Network"
+    severity: "MEDIUM"
+    condition: "Spec.Rules[*].HTTP.Paths[*].Backend.Service.Port.Protocol != 'HTTPS'"
+    suggestion: "Use HTTPS for backend services"
+    metadata:
+      risk: "Internal unencrypted traffic"
+      impact: "Data exposure within cluster"
+      remediation: "Configure backend services to use HTTPS"

@@ -1,0 +1,107 @@
+rules:
+  - name: privileged-container
+    description: "Container is running in privileged mode"
+    category: "Security"
+    severity: "CRITICAL"
+    condition: "Spec.Containers[*].SecurityContext.Privileged == true"
+    suggestion: "Remove privileged mode unless absolutely necessary"
+    metadata:
+      risk: "Full host access"
+      impact: "Potential host system compromise"
+
+  - name: no-resource-limits
+    description: "Container does not have resource limits set"
+    category: "Resources"
+    severity: "MEDIUM"
+    condition: "Resources.Limits == null || Resources.Limits.Cpu == 0 || Resources.Limits.Memory == 0"
+    suggestion: "Set resource limits to prevent resource exhaustion"
+
+  - name: host-path-mount
+    description: "Pod mounts host path"
+    category: "Security"
+    severity: "HIGH"
+    condition: "Spec.Volumes[*].HostPath != null"
+    suggestion: "Use persistent volumes instead of host paths"
+    metadata:
+      risk: "Host filesystem exposure"
+      impact: "Data breach or host system modification"
+
+  - name: missing-security-context
+    description: "Container security context not set"
+    category: "Security"
+    severity: "MEDIUM"
+    condition: "Spec.Containers[*].SecurityContext == null"
+    suggestion: "Configure security context with appropriate settings"
+    metadata:
+      risk: "Default security settings"
+      impact: "Potential security misconfigurations"
+
+  - name: runs-as-root
+    description: "Container may run as root user"
+    category: "Security"
+    severity: "HIGH"
+    condition: "Spec.Containers[*].SecurityContext.RunAsNonRoot != true"
+    suggestion: "Set SecurityContext.RunAsNonRoot=true"
+    metadata:
+      risk: "Root privileges"
+      impact: "Elevated permissions in container"
+
+  - name: host-namespace-usage
+    description: "Pod uses host namespaces"
+    category: "Security"
+    severity: "HIGH"
+    condition: "Spec.HostNetwork == true || Spec.HostPID == true || Spec.HostIPC == true"
+    suggestion: "Avoid using host namespaces"
+    metadata:
+      risk: "Host namespace exposure"
+      impact: "Container isolation bypass"
+
+  - name: missing-resource-requests
+    description: "Container does not specify resource requests"
+    category: "Resources"
+    severity: "MEDIUM"
+    condition: "Spec.Containers[*].Resources.Requests == null"
+    suggestion: "Set resource requests to ensure proper scheduling"
+    metadata:
+      risk: "Resource contention"
+      impact: "Performance and stability issues"
+
+  - name: privileged-ports
+    description: "Container uses privileged ports (below 1024)"
+    category: "Security"
+    severity: "MEDIUM"
+    condition: "Spec.Containers[*].Ports[*].ContainerPort < 1024"
+    suggestion: "Use non-privileged ports (>1024) when possible"
+    metadata:
+      risk: "Privileged port usage"
+      impact: "Potential port conflicts with host"
+
+  - name: writable-root-filesystem
+    description: "Container has writable root filesystem"
+    category: "Security"
+    severity: "MEDIUM"
+    condition: "Spec.Containers[*].SecurityContext.ReadOnlyRootFilesystem != true"
+    suggestion: "Enable ReadOnlyRootFilesystem"
+    metadata:
+      risk: "Filesystem modifications"
+      impact: "Runtime modifications to container"
+
+  - name: automount-service-account-token
+    description: "Pod automatically mounts service account token"
+    category: "Security"
+    severity: "MEDIUM"
+    condition: "Spec.AutomountServiceAccountToken != false"
+    suggestion: "Disable automount of service account token if not needed"
+    metadata:
+      risk: "Unnecessary credential exposure"
+      impact: "Potential credential misuse"
+
+  - name: host-port-binding
+    description: "Container binds to host ports"
+    category: "Security"
+    severity: "MEDIUM"
+    condition: "Spec.Containers[*].Ports[*].HostPort != null"
+    suggestion: "Use service abstractions instead of host ports"
+    metadata:
+      risk: "Host port conflicts"
+      impact: "Port availability issues"

@@ -1,4 +1,4 @@
-module github.com/afshin-deriv/k8s-auditor
+module github.com/afshin-deriv/kubekitty
 
 go 1.23.2
 

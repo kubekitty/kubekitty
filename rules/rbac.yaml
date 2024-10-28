@@ -1,0 +1,70 @@
+rules:
+  - name: wildcard-permissions
+    description: "Resource uses wildcard permissions"
+    category: "RBAC"
+    severity: "HIGH"
+    condition: "Rules.Verbs.Contains('*') || Rules.Resources.Contains('*')"
+    suggestion: "Specify explicit permissions instead of using wildcards"
+    metadata:
+      risk: "Excessive permissions"
+      impact: "Potential privilege escalation"
+
+  - name: default-service-account-binding
+    description: "Default service account has role bindings"
+    category: "RBAC"
+    severity: "HIGH"
+    condition: "Subject.Kind == 'ServiceAccount' && Subject.Name == 'default'"
+    suggestion: "Create dedicated service accounts with minimal permissions"
+    metadata:
+      risk: "Insecure defaults"
+      impact: "Potential unauthorized access"
+
+  - name: sensitive-resource-access
+    description: "Role has access to sensitive resources"
+    category: "RBAC"
+    severity: "HIGH"
+    condition: "Rules.Resources.ContainsAny(['secrets', 'pods', 'nodes', 'persistentvolumes'])"
+    suggestion: "Review if access to sensitive resources is necessary"
+    metadata:
+      risk: "Sensitive data exposure"
+      impact: "Potential data breach"
+
+  - name: cross-namespace-binding
+    description: "RoleBinding references subject from different namespace"
+    category: "RBAC"
+    severity: "MEDIUM"
+    condition: "Subject.Namespace != '' && Subject.Namespace != Metadata.Namespace"
+    suggestion: "Review if cross-namespace access is necessary"
+    metadata:
+      risk: "Namespace isolation bypass"
+      impact: "Cross-namespace access"
+
+  - name: cluster-admin-binding
+    description: "Binding grants cluster-admin privileges"
+    category: "RBAC"
+    severity: "CRITICAL"
+    condition: "RoleRef.Name == 'cluster-admin'"
+    suggestion: "Review if cluster-admin access is absolutely necessary"
+    metadata:
+      risk: "Unlimited cluster access"
+      impact: "Complete cluster compromise"
+
+  - name: privileged-verbs
+    description: "Role grants high-privilege verbs"
+    category: "RBAC"
+    severity: "HIGH"
+    condition: "Rules.Verbs.ContainsAny(['create', 'delete', 'deletecollection', 'patch', 'update'])"
+    suggestion: "Consider using read-only permissions where possible"
+    metadata:
+      risk: "Resource modification"
+      impact: "System state changes"
+
+  - name: system-namespace-access
+    description: "Role has access to system namespaces"
+    category: "RBAC"
+    severity: "HIGH"
+    condition: "Rules.Namespaces.ContainsAny(['kube-system', 'kube-public'])"
+    suggestion: "Avoid granting access to system namespaces"
+    metadata:
+      risk: "System compromise"
+      impact: "Cluster stability"
