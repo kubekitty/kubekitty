@@ -1,9 +1,9 @@
-### Audit all namespaces
+### Check all namespaces
 ```
 go run main.go
 ```
 
-#### Audit specific namespace
+#### Check specific namespace
 ```
 go run main.go --namespace default
 ```
