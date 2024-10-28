@@ -2,7 +2,7 @@
 
 A comprehensive security analysis tool for Kubernetes clusters.
 
-![Kubernetes Security Auditor Demo](./docs/static_files/sample_output.png)
+<img src="./docs/static_files/sample_output.png" style="width: 800px;" alt="K8S Security Auditor screenshot">
 
 ## Installation
 
