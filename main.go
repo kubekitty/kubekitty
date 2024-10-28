@@ -12,6 +12,7 @@ import (
 
 	"github.com/afshin-deriv/k8s-auditor/pkg/auditors"
 	"github.com/afshin-deriv/k8s-auditor/pkg/types"
+	"github.com/fatih/color"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
@@ -25,6 +26,44 @@ type Config struct {
 	MinSeverity   string
 	Format        string
 	IncludeSystem bool
+}
+
+// Define colored output functions
+var (
+	success    = color.New(color.FgGreen, color.Bold).SprintfFunc()
+	info       = color.New(color.FgCyan, color.Bold).SprintfFunc()
+	warning    = color.New(color.FgYellow, color.Bold).SprintfFunc()
+	errorColor = color.New(color.FgRed, color.Bold).SprintfFunc()
+
+	// Severity colors
+	criticalColor = color.New(color.BgRed, color.FgWhite, color.Bold).SprintfFunc()
+	highColor     = color.New(color.FgRed, color.Bold).SprintfFunc()
+	mediumColor   = color.New(color.FgYellow, color.Bold).SprintfFunc()
+	lowColor      = color.New(color.FgBlue, color.Bold).SprintfFunc()
+)
+
+// emojis for different message types
+const (
+	rocket    = "🚀"
+	warning_  = "⚠️ "
+	check     = "✅"
+	cross     = "❌"
+	lock      = "🔒"
+	magnifier = "🔍"
+	folder    = "📁"
+	gear      = "⚙️ "
+	chart     = "📊"
+	shield    = "🛡️ "
+	time_     = "⏱️ "
+)
+
+func printStartupBanner() {
+	fmt.Printf(`
+%s Welcome to Kubernetes Security Auditor %s
+%s A comprehensive security analysis tool for your clusters %s
+________________________________________________
+
+`, lock, lock, shield, shield)
 }
 
 func parseFlags() *Config {
@@ -76,60 +115,104 @@ func runAudits(ctx context.Context, auditors []auditors.Auditor) types.AuditRepo
 		Summary:     make(map[string]int),
 	}
 
-	// Run each auditor
+	fmt.Printf("\n%s Starting security audit...\n", rocket)
+
 	for _, auditor := range auditors {
-		log.Printf("Running %s...", auditor.Name())
+		fmt.Printf("\n%s Running %s\n", magnifier, info(auditor.Name()))
 
 		findings, err := auditor.Audit(ctx)
 		if err != nil {
-			log.Printf("Error running %s: %v", auditor.Name(), err)
+			fmt.Printf("%s Error running %s: %v\n", cross, errorColor(auditor.Name()), err)
 			continue
 		}
 
-		// Add findings to report
 		report.Findings = append(report.Findings, findings...)
 
-		// Update summary
 		for _, finding := range findings {
 			report.Summary[finding.Severity]++
 			report.TotalIssues++
 		}
 
-		log.Printf("Completed %s - found %d issues", auditor.Name(), len(findings))
+		fmt.Printf("%s Completed %s - found %s issues\n",
+			check,
+			info(auditor.Name()),
+			warning("%d", len(findings)))
 	}
 
 	return report
 }
 
-func writeReport(report types.AuditReport, outputFile string) error {
-	// Create summary
-	summary := fmt.Sprintf("\nAudit Summary:\n"+
-		"Total Issues: %d\n"+
-		"Critical: %d\n"+
-		"High: %d\n"+
-		"Medium: %d\n"+
-		"Low: %d\n",
-		report.TotalIssues,
-		report.Summary["CRITICAL"],
-		report.Summary["HIGH"],
-		report.Summary["MEDIUM"],
-		report.Summary["LOW"])
+func printFindingSummary(finding types.Finding) {
+	var severityColor func(string, ...interface{}) string
+	var emoji string
 
-	// Print summary to console
-	fmt.Println(summary)
+	switch finding.Severity {
+	case "CRITICAL":
+		severityColor = criticalColor
+		emoji = "🚨"
+	case "HIGH":
+		severityColor = highColor
+		emoji = "⚠️"
+	case "MEDIUM":
+		severityColor = mediumColor
+		emoji = "⚡"
+	case "LOW":
+		severityColor = lowColor
+		emoji = "ℹ️"
+	}
+
+	fmt.Printf("\n%s %s: %s\n",
+		emoji,
+		severityColor(finding.Severity),
+		warning(finding.Description))
+	fmt.Printf("   %s Resource: %s\n", gear, info(finding.Resource))
+	if finding.Namespace != "" {
+		fmt.Printf("   %s Namespace: %s\n", folder, info(finding.Namespace))
+	}
+	fmt.Printf("   %s Suggestion: %s\n", magnifier, finding.Suggestion)
+
+	if len(finding.Metadata) > 0 {
+		fmt.Printf("   %s Additional Info:\n", info("ℹ️"))
+		for k, v := range finding.Metadata {
+			fmt.Printf("      • %s: %s\n", k, v)
+		}
+	}
+}
+
+func writeReport(report types.AuditReport, outputFile string) error {
+	// Create colorful summary
+	summaryStr := fmt.Sprintf(`
+%s Audit Summary %s
+%s Total Issues: %d
+
+Severity Breakdown:
+%s Critical: %d
+%s High:     %d
+%s Medium:   %d
+%s Low:      %d
+
+`,
+		chart, time_,
+		warning_, report.TotalIssues,
+		criticalColor("■"), report.Summary["CRITICAL"],
+		highColor("■"), report.Summary["HIGH"],
+		mediumColor("■"), report.Summary["MEDIUM"],
+		lowColor("■"), report.Summary["LOW"])
+
+	fmt.Println(summaryStr)
 
 	// Marshal report to JSON
 	reportJSON, err := json.MarshalIndent(report, "", "  ")
 	if err != nil {
-		return fmt.Errorf("error marshaling report: %v", err)
+		return fmt.Errorf("%s error marshaling report: %v", cross, err)
 	}
 
 	// Write to file
 	if err := os.WriteFile(outputFile, reportJSON, 0644); err != nil {
-		return fmt.Errorf("error writing report to file: %v", err)
+		return fmt.Errorf("%s error writing report to file: %v", cross, err)
 	}
 
-	log.Printf("Report written to %s", outputFile)
+	fmt.Printf("%s Report written to: %s\n", folder, info(outputFile))
 	return nil
 }
 
@@ -155,22 +238,22 @@ func filterFindingsBySeverity(findings []types.Finding, minSeverity string) []ty
 }
 
 func main() {
-	// Parse command line flags
+	printStartupBanner()
+
 	cfg := parseFlags()
 
-	// Enable debug logging if requested
 	if cfg.Debug {
+		fmt.Printf("%s Debug mode enabled\n", gear)
 		log.SetFlags(log.LstdFlags | log.Lshortfile)
 	}
 
-	// Initialize Kubernetes client
 	client, err := initializeClient(cfg)
 	if err != nil {
-		log.Fatalf("Error initializing Kubernetes client: %v", err)
+		fmt.Printf("%s %s\n", cross, errorColor("Error initializing Kubernetes client: %v", err))
+		os.Exit(1)
 	}
 
-	// Create audit context
-	ctx := context.Background()
+	fmt.Printf("%s Successfully connected to Kubernetes cluster\n", check)
 
 	// Create base auditor configuration
 	baseAuditor := auditors.BaseAuditor{
@@ -185,23 +268,36 @@ func main() {
 		auditors.NewNetworkAuditor(baseAuditor),
 	}
 
-	log.Printf("Starting security audit...")
 	if cfg.Namespace != "" {
-		log.Printf("Auditing namespace: %s", cfg.Namespace)
+		fmt.Printf("%s Auditing namespace: %s\n", folder, info(cfg.Namespace))
 	} else {
-		log.Printf("Auditing all namespaces")
+		fmt.Printf("%s Auditing all namespaces\n", folder)
 	}
 
 	// Run audits
-	report := runAudits(ctx, auditorsToRun)
+	report := runAudits(context.Background(), auditorsToRun)
 
 	// Filter findings by minimum severity if specified
 	if cfg.MinSeverity != "" {
+		fmt.Printf("\n%s Filtering findings by minimum severity: %s\n",
+			magnifier,
+			warning(cfg.MinSeverity))
 		report.Findings = filterFindingsBySeverity(report.Findings, cfg.MinSeverity)
 	}
 
 	// Write report
 	if err := writeReport(report, cfg.OutputFile); err != nil {
-		log.Fatalf("Error writing report: %v", err)
+		fmt.Printf("%s %s\n", cross, error(err))
+		os.Exit(1)
 	}
+	// Print detailed findings if requested
+	if cfg.Debug {
+		fmt.Printf("\n%s Detailed Findings:\n", magnifier)
+		for _, finding := range report.Findings {
+			printFindingSummary(finding)
+		}
+	}
+
+	fmt.Printf("\n%s Audit completed successfully! %s\n", rocket, check)
+
 }
