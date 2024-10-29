@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/afshin-deriv/kubekitty/pkg/types"
+	"github.com/kubekitty/kubekitty/pkg/types"
 	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/runtime"
 )

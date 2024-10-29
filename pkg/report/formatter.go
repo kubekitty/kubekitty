@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/afshin-deriv/kubekitty/pkg/types"
+	"github.com/kubekitty/kubekitty/pkg/types"
 	"gopkg.in/yaml.v2"
 )
 

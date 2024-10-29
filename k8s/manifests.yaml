@@ -1,0 +1,120 @@
+---
+# ServiceAccount for the controller
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kubekitty-controller
+  namespace: security-audit
+---
+# ClusterRole with required permissions
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kubekitty-controller
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "secrets", "namespaces"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "statefulsets", "daemonsets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["networkpolicies"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
+  verbs: ["get", "list", "watch"]
+---
+# ClusterRoleBinding to bind the ServiceAccount to the ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kubekitty-controller
+subjects:
+- kind: ServiceAccount
+  name: kubekitty-controller
+  namespace: security-audit
+roleRef:
+  kind: ClusterRole
+  name: kubekitty-controller
+  apiGroup: rbac.authorization.k8s.io
+---
+# ConfigMap for rules
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubekitty-rules
+  namespace: security-audit
+data:
+  pods.yaml: |
+    rules:
+      - name: privileged-container
+        description: "Detect privileged containers"
+        category: "Security"
+        severity: "HIGH"
+        condition: "spec.containers[*].securityContext.privileged == true"
+  rbac.yaml: |
+    rules:
+      - name: cluster-admin-binding
+        description: "Detect cluster-admin role bindings"
+        category: "Security"
+        severity: "CRITICAL"
+        condition: "roleRef.name == 'cluster-admin'"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubekitty-controller
+  namespace: security-audit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubekitty-controller
+  template:
+    metadata:
+      labels:
+        app: kubekitty-controller
+    spec:
+      serviceAccountName: kubekitty-controller
+      containers:
+      - name: controller
+        image: kubekitty/kubekitty-controller:v3
+        imagePullPolicy: Never
+        args:
+        - "--rules-dir=/etc/kubekitty/rules"
+        - "--log-level=debug"
+        - "-v=4"  # Detailed debug logging
+        env:
+        - name: LOG_FORMAT
+          value: "json"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        volumeMounts:
+        - name: rules-volume
+          mountPath: /etc/kubekitty/rules
+      volumes:
+      - name: rules-volume
+        configMap:
+          name: kubekitty-rules
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      volumes:
+      - name: rules-volume
+        configMap:
+          name: kubekitty-rules

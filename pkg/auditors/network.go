@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/afshin-deriv/kubekitty/pkg/types"
+	"github.com/kubekitty/kubekitty/pkg/types"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

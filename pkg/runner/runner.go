@@ -7,11 +7,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/afshin-deriv/kubekitty/pkg/auditors"
-	"github.com/afshin-deriv/kubekitty/pkg/config"
-	"github.com/afshin-deriv/kubekitty/pkg/rules"
-	"github.com/afshin-deriv/kubekitty/pkg/types"
-	"github.com/afshin-deriv/kubekitty/pkg/ui"
+	"github.com/kubekitty/kubekitty/pkg/auditors"
+	"github.com/kubekitty/kubekitty/pkg/config"
+	"github.com/kubekitty/kubekitty/pkg/rules"
+	"github.com/kubekitty/kubekitty/pkg/types"
+	"github.com/kubekitty/kubekitty/pkg/ui"
 	"gopkg.in/yaml.v2"
 )
 

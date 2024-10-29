@@ -32,6 +32,16 @@ rules:
     condition: .spec.hostPID == true
     suggestion: Set hostPID to false in the Pod's security context.
 ```
+
+### logging levels:
+```
+V(1): Important production info
+V(2): General operational info
+V(3): Extended debug info
+V(4): Detailed debugging
+V(5): Trace-level debugging
+```
+
 ## Features
 
 - 🔍 Comprehensive security auditing

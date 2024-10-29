@@ -1,4 +1,4 @@
-module github.com/afshin-deriv/kubekitty
+module github.com/kubekitty/kubekitty
 
 go 1.23.2
 

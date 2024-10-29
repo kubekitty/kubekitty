@@ -9,9 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/afshin-deriv/kubekitty/pkg/config"
-	"github.com/afshin-deriv/kubekitty/pkg/runner"
-	"github.com/afshin-deriv/kubekitty/pkg/ui"
+	"github.com/kubekitty/kubekitty/pkg/config"
+	"github.com/kubekitty/kubekitty/pkg/runner"
+	"github.com/kubekitty/kubekitty/pkg/ui"
 )
 
 func main() {

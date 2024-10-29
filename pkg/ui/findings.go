@@ -3,7 +3,7 @@ package ui
 import (
 	"fmt"
 
-	"github.com/afshin-deriv/kubekitty/pkg/types"
+	"github.com/kubekitty/kubekitty/pkg/types"
 )
 
 // PrintFinding prints a single finding with appropriate formatting
