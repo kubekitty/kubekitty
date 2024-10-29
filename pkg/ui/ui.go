@@ -33,16 +33,17 @@ const (
 	ChartEmoji     = "📊"
 	ShieldEmoji    = "🛡️"
 	TimeEmoji      = "⏱️"
+	CatEmoji       = "🐱"
 )
 
 // PrintStartupBanner prints the application startup banner
 func PrintStartupBanner() {
 	fmt.Printf(`
-%s Kubernetes Security Auditor %s
-%s A comprehensive security analysis tool for your clusters %s
+%s KubeKitty Security Auditor %s
+%s A comprehensive security analysis tool for your k8s clusters %s
 ________________________________________________
 
-`, LockEmoji, LockEmoji, ShieldEmoji, ShieldEmoji)
+`, CatEmoji, CatEmoji, ShieldEmoji, ShieldEmoji)
 }
 
 // PrintProgress prints a progress message

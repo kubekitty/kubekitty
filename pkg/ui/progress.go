@@ -31,7 +31,7 @@ func (p *ProgressIndicator) Start() {
 				return
 			default:
 				frame := frames[i%len(frames)]
-				fmt.Printf("\r%s %s %s", MagnifierEmoji, frame, info(p.message))
+				fmt.Printf("\r%s %s %s\n", MagnifierEmoji, frame, info(p.message))
 				time.Sleep(100 * time.Millisecond)
 				i++
 			}
