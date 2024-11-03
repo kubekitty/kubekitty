@@ -1,11 +1,11 @@
-# KubeKitty <img src="docs/static_files/kubekitty_logo.jpeg" width="30" alt="KubeKitty Logo">
+<p align="center">
+  <img src="logo/kubekitty_logo.jpeg" width="300" />
+</p>
 
+# KubeKitty
 A comprehensive security analysis tool for Kubernetes clusters.
 
-<img src="./docs/static_files/sample_output.png" style="width: 500px;" alt="KubeKitty screenshot">
-
 ## Installation
-
 ```bash
 go get github.com/afshin-deriv/kubekitty
 ```
