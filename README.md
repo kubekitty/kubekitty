@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo/kubekitty_logo.jpeg" width="300" />
+  <img src="logo/kubekitty_logo.png" width="300" />
 </p>
 
 # KubeKitty
